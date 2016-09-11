@@ -7,17 +7,41 @@ class App extends Component {
   constructor() {
     super();
     this.state = { todos: [], filter: 'all' };
-    this.inputRefCb = this.inputRefCb.bind(this);
-    this.handleKeyDown = this.handleKeyDown.bind(this);
-    this.handleItemClick = this.handleItemClick.bind(this);
+
+    this.bindThis([
+      "inputRefCb",
+      "handleKeyDown",
+      "handleItemClick",
+      "handleSubmit",
+      "handleAllFilterClick",
+      "handleTodoFilterClick",
+      "handleDoneFilterClick"
+    ]);
+  }
+
+  bindThis(functionNames) {
+    functionNames.forEach((name) => {
+      this[name] = this[name].bind(this);
+    });
+  }
+
+  filteredTodos() {
+    console.log('filteredTodos', this.state.filter, this.state.todos);
+    if (this.state.filter === 'all') {
+      return this.state.todos;
+    } else {
+      return this.state.todos.filter(el => {
+        return el.done === (this.state.filter === 'done') ;
+      });
+    }
   }
 
   renderTodos() {
-    return this.state.todos.map((el, i) => {
+    return this.filteredTodos().map((el, i) => {
+      const cssClasses = `item${el.done ? " done" : ""}`;
       return(
-        // <li key={el.slug} onClick={this.handleItemClick.bind(null, i)}>
-        <li key={i} onClick={this.handleItemClick.bind(null, i)} className={el.done ? "done" : null}>
-          {el.title} ({el.done ? "0" : "1"})
+        <li key={i} onClick={this.handleItemClick.bind(null, i)} className={cssClasses}>
+          {el.title}
         </li>
       );
     });
@@ -40,28 +64,59 @@ class App extends Component {
   handleKeyDown({ key }) {
     switch (key) {
       case "Enter":
-        const value = this._inputEl.value;
-        const slug = this.generateSlug(value);
-        this.setState({ todos: this.state.todos.concat([{ title: this._inputEl.value, done: false, slug }]) });
+        this.addTodoToState(this._inputEl.value);
         break;
       default:
         break;
     }
   }
 
+  addTodoToState() {
+    const value = this._inputEl.value;
+    const slug = this.generateSlug(value);
+    this.setState({ todos: this.state.todos.concat([{ title: value, done: false, slug }]) });
+    this._inputEl.value = null;
+  }
+
   handleItemClick(i) {
-    // const items = [1,2,3];
-    // console.log([...items, 4, 5, 6]);
     this.setState({ todos: [...this.state.todos.slice(0,i), { ...this.state.todos[i], done: !this.state.todos[i].done }, ...this.state.todos.slice(i + 1)] });
-    //this.setState({ todos: [...this.state.todos.slice(0,i), { active: !this.state.todos[i].active } ] }); //, ...this.state.todos.slice(i + 1)]);
+  }
+
+  handleSubmit() {
+    this.addTodoToState();
+    this._inputEl.value = null;
+    this._inputEl.focus();
+  }
+
+  handleAllFilterClick() {
+    this.setState({ filter: 'all' });
+  }
+
+  handleTodoFilterClick() {
+    this.setState({ filter: 'todo' });
+  }
+
+  handleDoneFilterClick() {
+    this.setState({ filter: 'done' });
   }
 
   render() {
     return (
       <div className="App">
         <h1>Todos</h1>
-        <input type="text" onKeyDown={this.handleKeyDown} ref={this.inputRefCb} />
-        <ul>
+
+        { /* https://facebook.github.io/react/docs/tags-and-attributes.html#html-attributes */ }
+        <input type='text' onKeyDown={this.handleKeyDown} ref={this.inputRefCb} autoFocus />
+        <input type='button' value='Add Todo' onClick={this.handleSubmit} />
+
+        <p>
+          <strong>Filters:</strong>&nbsp;
+          <span className={`filter allFilter${this.state.filter === 'all' ? ' is-active' : ''}`} onClick={this.handleAllFilterClick}>all</span> &bull;&nbsp;
+          <span className={`filter todoFilter${this.state.filter === 'todo' ? ' is-active' : ''}`} onClick={this.handleTodoFilterClick}>todo</span> &bull;&nbsp;
+          <span className={`filter doneFilter${this.state.filter === 'done' ? ' is-active' : ''}`} onClick={this.handleDoneFilterClick}>done</span>
+        </p>
+
+        <ul className='todosList'>
           { this.renderTodos() }
         </ul>
       </div>
