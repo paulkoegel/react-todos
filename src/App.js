@@ -110,10 +110,16 @@ class App extends Component {
         <input type='button' value='Add Todo' onClick={this.handleSubmit} />
 
         <p>
-          <strong>Filters:</strong>&nbsp;
-          <span className={`filter allFilter${this.state.filter === 'all' ? ' is-active' : ''}`} onClick={this.handleAllFilterClick}>all</span> &bull;&nbsp;
-          <span className={`filter todoFilter${this.state.filter === 'todo' ? ' is-active' : ''}`} onClick={this.handleTodoFilterClick}>todo</span> &bull;&nbsp;
-          <span className={`filter doneFilter${this.state.filter === 'done' ? ' is-active' : ''}`} onClick={this.handleDoneFilterClick}>done</span>
+          <strong>Filter:</strong>&nbsp;
+          <span className={`filter allFilter${this.state.filter === 'all' ? ' is-active' : ''}`} onClick={this.handleAllFilterClick}>
+            all ({ this.state.todos.length })
+          </span> &bull;&nbsp;
+          <span className={`filter todoFilter${this.state.filter === 'todo' ? ' is-active' : ''}`} onClick={this.handleTodoFilterClick}>
+            todo ({ this.state.todos.filter(el => el.done === false).length })
+          </span> &bull;&nbsp;
+          <span className={`filter doneFilter${this.state.filter === 'done' ? ' is-active' : ''}`} onClick={this.handleDoneFilterClick}>
+            done ({ this.state.todos.filter(el => el.done === true).length })
+          </span>
         </p>
 
         <ul className='todosList'>
